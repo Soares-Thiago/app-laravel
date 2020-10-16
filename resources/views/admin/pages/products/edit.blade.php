@@ -1,15 +1,15 @@
 @extends('admin.layout.app')
 
-@section('title', 'Cadastrar Novo Produto')
-
+@section('title', 'Editar Produto')
+<div class='container'>
+    <div class="card text-black bg-light mb-3" >
 @section('content')
-<b>Editar Produto {{$id}}</b>
 
-<form action="{{ route('products.update',$id) }}" method = "post">
+<h1><a href="{{route('products.index')}}" class='btn btn-primary'> <i class="fas fa-arrow-left"></i></a> Editar Produto {{$product->name}}</h1>
+
+<form action="{{ route('products.update',$product->id) }}" method = "post">
     @method('PUT')
-    @csrf
-        <input type="text" name="name" placeholder="Digite o nome">
-        <input type="text" name="descricao" placeholder="Digite a descrição">
-        <button type="submit">Enviar</button>
+    @include('admin.pages.products.partils.form')
     </form>   
+    </div></div>   
 @endsection

@@ -9,12 +9,13 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     protected $request;
+    private $repository;
 
-    public function __construct(Request $request)
+    public function __construct(Request $request, Product $product)
     {
         //dd($request->prm1);
         $this->$request = $request;
-
+        $this->repository = $product;
         //$this->middleware("auth")->only(['create','storage']);
         //$this->middleware("auth")->except('index');
     }
@@ -69,7 +70,7 @@ class ProductController extends Controller
         }*/
         $data = $request->only('name', 'description', 'price');
 
-        Product::create($data);
+        $this->repository->create($data);
 
         return redirect()->route('products.index');
     }
@@ -83,7 +84,7 @@ class ProductController extends Controller
     public function show($id)
     {
         //$products = Product::where('id', $id)->first();
-        $products = Product::find($id);
+        $products =  $this->repository->find($id);
         if(!$products){
             return redirect()->back();
         }
@@ -100,7 +101,14 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        return view("admin.pages.products.edit", compact('id'));
+        $product =  $this->repository->find($id);
+        if(!$product){
+            return redirect()->back();
+        }
+
+        return view("admin.pages.products.edit", [
+            'product' => $product
+        ]);
     }
 
     /**
@@ -110,9 +118,15 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreUpdateProductRequest $request, $id)
     {
-        dd('editando produto:', $id);
+        $product =  $this->repository->find($id);
+        if(!$product){
+            return redirect()->back();
+        }
+
+        $product->update($request->all());
+        return redirect()->route('products.index');
     }
 
     /**
@@ -123,6 +137,12 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $product =  $this->repository->find($id);
+        if(!$product){
+            return redirect()->back();
+        }
+
+        $product->delete();
+        return redirect()->route('products.index');
     }
 }

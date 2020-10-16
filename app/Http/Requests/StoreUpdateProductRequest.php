@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreUpdateProductRequest extends FormRequest
 {
@@ -23,11 +24,13 @@ class StoreUpdateProductRequest extends FormRequest
      */
     public function rules()
     {
+        $id = $this->segment(2);//recuperando o id pela url, o segmento 2
+
         return [
-            'name' => 'required|min:3|max:100',
+            'name' => 'required|min:3|max:255|'.Rule::unique('products')->ignore($id).'',
             'description' => 'min:3|max:10000',
-            'price' => 'required',
-            'foto' => 'nullable|required|image'
+            'price' => 'required|between:0,99.99',
+            'foto' => 'nullable|image'
         ];
     }
 
@@ -36,8 +39,8 @@ class StoreUpdateProductRequest extends FormRequest
         return [
             'name.required' => 'Nome é obrigatório',
             'name.min' => 'Nome precisa de 3 caracteres mínimos',
-            'price.required' => 'Informe um preço',
-            'foto.required' => 'Foto é obrigatório'
+            'price.required' => 'Informe um preço'
+           
         ];
     }
 }
