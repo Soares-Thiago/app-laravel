@@ -1,8 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+Route::any('products/search', 'ProductController@search')->name('products.search')->middleware('auth');
 
-Route::resource("products", "ProductController");
+Route::resource("products", "ProductController")->middleware(['auth','check.is.admin']);
 
 /*
 Route::get('products/{id}/edit', "ProductController@edit")->name("products.edit");
@@ -140,3 +141,7 @@ Route::group([
     Route::get('/','TesteController@teste')->name('admin.home');
 });
 
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');

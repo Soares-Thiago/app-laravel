@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUpdateProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -65,10 +66,12 @@ class ProductController extends Controller
         dd($request->all());
         dd($request->input('name'));
         dd($request->except('_token'));*/
-        /*if($request->file('foto')->isValid()){
-            dd($request->file('foto')->store('products'));
-        }*/
         $data = $request->only('name', 'description', 'price');
+
+        if($request->hasFile('foto') && $request->file('foto')->isValid()){
+            $image_path = ($request->file('foto')->store('products'));
+            $data['image'] = $image_path;
+        }
 
         $this->repository->create($data);
 
@@ -125,7 +128,19 @@ class ProductController extends Controller
             return redirect()->back();
         }
 
-        $product->update($request->all());
+        $data = $request->only('name', 'description', 'price');
+
+        if($request->hasFile('foto') && $request->file('foto')->isValid()){
+
+            if($product->image && Storage::exists($product->image)){
+                Storage::delete($product->image);
+            }
+
+            $image_path = ($request->file('foto')->store('products'));
+            $data['image'] = $image_path;
+        }
+
+        $product->update($data);
         return redirect()->route('products.index');
     }
 
@@ -142,7 +157,24 @@ class ProductController extends Controller
             return redirect()->back();
         }
 
+        if($product->image && Storage::exists($product->image)){
+            Storage::delete($product->image);
+        }
+
         $product->delete();
         return redirect()->route('products.index');
+    }
+
+    public function search (Request $request){
+
+        $filters = $request->except('_token');
+
+        $products = $this->repository->search($request->filter);
+
+        return view('admin.pages.products.index',[
+            'products' => $products,
+            'filters' => $filters
+        ]);
+
     }
 }
